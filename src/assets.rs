@@ -22,7 +22,7 @@ struct AudioAssets {
 */
 
 #[derive(AssetCollection, Resource)]
-struct ImageAssets {
+pub struct ImageAssets {
     // if the sheet would have padding, we could set that with `padding_x` and `padding_y`.
     // if there's space between the top left corner of the sheet and the first sprite, we could configure that with `offset_x` and `offset_y`
     #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_093.png")]
@@ -54,7 +54,7 @@ impl Plugin for AssetsPlugin {
 }
 
 #[derive(Component)]
-struct AnimationTimer(Timer);
+pub struct AnimationTimer(Timer);
 
 fn animate_sprite_system(
     time: Res<Time>,
