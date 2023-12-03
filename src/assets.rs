@@ -6,7 +6,7 @@
 #![allow(unused)]
 
 // use assets::AssetsPlugin;
-use bevy::prelude::*;
+use bevy::{math::Vec2, prelude::*};
 use bevy_asset_loader::prelude::*;
 
 use crate::GameState;
@@ -70,8 +70,13 @@ fn animate_sprite_system(
 
 fn draw_fish(mut commands: Commands, image_assets: Res<ImageAssets>) {
     // draw single texture from sprite sheet starting at index 0
+    let sprite_size = Vec2::new(10., 10.);
     commands.spawn((
         SpriteBundle {
+            sprite: Sprite {
+                custom_size: Some(sprite_size),
+                ..Default::default()
+            },
             transform: Transform {
                 translation: Vec3::new(-50., 0., 1.),
                 ..Default::default()
@@ -82,7 +87,11 @@ fn draw_fish(mut commands: Commands, image_assets: Res<ImageAssets>) {
         },
         Name::new("puffer_fish"),
     ));
-    commands.spawn((SpriteBundle {
+    commands.spawn((
+        SpriteBundle {
+            sprite: Sprite {
+                custom_size: Some(sprite_size), ..Default::default()
+            },
             transform: Transform {
                 translation: Vec3::new(50., 0., 1.),
                 ..Default::default()
