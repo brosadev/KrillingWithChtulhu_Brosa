@@ -6,6 +6,8 @@
 
 use bevy::prelude::*;
 
+mod krill;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
