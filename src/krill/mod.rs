@@ -1,9 +1,16 @@
 use bevy::prelude::*;
 
-mod krill;
+use crate::GameState;
 
-pub struct Krill;
+use self::systems::{debug_krill, spawn_krill};
 
-impl Plugin for Krill {
-    fn build(&self, app: &mut App) {}
+mod systems;
+
+pub struct KrillPlugin;
+
+impl Plugin for KrillPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(OnEnter(GameState::Active), spawn_krill)
+            .add_systems(Update, debug_krill);
+    }
 }

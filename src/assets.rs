@@ -26,15 +26,15 @@ pub struct ImageAssets {
     // if the sheet would have padding, we could set that with `padding_x` and `padding_y`.
     // if there's space between the top left corner of the sheet and the first sprite, we could configure that with `offset_x` and `offset_y`
     #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_093.png")]
-    krill: Handle<Image>,
+    pub krill: Handle<Image>,
     #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_101.png")]
-    puffer_fish: Handle<Image>,
+    pub puffer_fish: Handle<Image>,
     #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_079.png")]
-    red_fish: Handle<Image>,
+    pub red_fish: Handle<Image>,
     #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_077.png")]
-    blue_fish: Handle<Image>,
+    pub blue_fish: Handle<Image>,
     #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_073.png")]
-    green_fish: Handle<Image>,
+    pub green_fish: Handle<Image>,
 }
 
 pub struct AssetsPlugin;
@@ -82,7 +82,7 @@ fn draw_fish(mut commands: Commands, image_assets: Res<ImageAssets>) {
                 ..Default::default()
             },
             //sprite: TextureAtlasSprite::new(0),
-            texture: image_assets.puffer_fish.clone(),
+            texture: image_assets.krill.clone(),
             ..Default::default()
         },
         Name::new("puffer_fish"),
