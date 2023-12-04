@@ -10,7 +10,7 @@ mod player;
 
 // use assets::AssetsPlugin;
 use bevy::{prelude::*, render::camera::ScalingMode};
-use bevy_inspector_egui::{egui::Key, quick::WorldInspectorPlugin};
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use krill::KrillPlugin;
 use player::{player_movement, spawn_player};
 
