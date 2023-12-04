@@ -5,11 +5,13 @@
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 
 mod assets;
+mod krill;
 mod player;
 
 // use assets::AssetsPlugin;
 use bevy::{prelude::*, render::camera::ScalingMode};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use krill::KrillPlugin;
 use player::{player_movement, spawn_player};
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
@@ -18,6 +20,9 @@ pub enum GameState {
     Loading,
     Active,
 }
+
+#[derive(Event)]
+pub struct DebugEvent;
 
 /// This example demonstrates how to load a texture atlas from a sprite sheet
 ///
@@ -30,8 +35,11 @@ fn main() {
         .add_plugins(WorldInspectorPlugin::new())
         // Main Plugins
         .add_plugins(assets::AssetsPlugin)
+        // Actor plugins??
+        .add_plugins(KrillPlugin)
+        .add_event::<DebugEvent>()
         .add_systems(Startup, setup)
-        .add_systems(Update, player_movement)
+        .add_systems(Update, (player_movement, debug))
         .run();
 }
 
@@ -43,4 +51,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     };
     commands.spawn(camera);
     spawn_player(commands, asset_server);
+}
+
+pub fn debug(keyboard_input: Res<Input<KeyCode>>, mut debug_event_writer: EventWriter<DebugEvent>) {
+    if keyboard_input.just_pressed(KeyCode::Tab) {
+        debug_event_writer.send(DebugEvent);
+    }
 }
