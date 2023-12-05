@@ -6,13 +6,18 @@
 
 mod assets;
 mod krill;
+mod map;
+mod physics;
 mod player;
 
-// use assets::AssetsPlugin;
+use assets::AssetsPlugin;
 use bevy::{prelude::*, render::camera::ScalingMode};
+use bevy_asset_loader::loading_state::{LoadingState, LoadingStateAppExt};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use krill::KrillPlugin;
-use player::{player_movement, spawn_player};
+use map::MapPlugin;
+use physics::PhysicsPlugin;
+use player::PlayerPlugin;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
 pub enum GameState {
@@ -30,27 +35,31 @@ pub struct DebugEvent;
 fn main() {
     App::new()
         .add_state::<GameState>()
+        .add_loading_state(
+            LoadingState::new(GameState::Loading).continue_to_state(GameState::Active),
+        )
         .add_plugins(DefaultPlugins)
         // Development Plugins
         .add_plugins(WorldInspectorPlugin::new())
         // Main Plugins
-        .add_plugins(assets::AssetsPlugin)
-        // Actor plugins??
+        .add_plugins(PhysicsPlugin)
+        .add_plugins(AssetsPlugin)
+        .add_plugins(PlayerPlugin)
         .add_plugins(KrillPlugin)
+        .add_plugins(MapPlugin)
         .add_event::<DebugEvent>()
         .add_systems(Startup, setup)
-        .add_systems(Update, (player_movement, debug))
+        .add_systems(Update, debug)
         .run();
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup(mut commands: Commands) {
     let mut camera = Camera2dBundle::default();
     camera.projection.scaling_mode = ScalingMode::AutoMin {
         min_width: 256.,
         min_height: 144.,
     };
     commands.spawn(camera);
-    spawn_player(commands, asset_server);
 }
 
 pub fn debug(keyboard_input: Res<Input<KeyCode>>, mut debug_event_writer: EventWriter<DebugEvent>) {

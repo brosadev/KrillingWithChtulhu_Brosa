@@ -1,5 +1,5 @@
 [package]
-name = "bevy_ci_template"
+name = "krilling-with-cthulhu"
 version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0 OR CC0-1.0"
@@ -19,3 +19,4 @@ opt-level = 3
 bevy = "0.12"
 bevy-inspector-egui = "0.21.0"
 bevy_asset_loader = { version = "0.18.0", features = ["2d"] }
+bevy_rapier2d = "0.23.0"
