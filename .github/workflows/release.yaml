@@ -18,7 +18,7 @@ env:
 
   # Valid platforms: "github_releases, itchio, github_pages"
   # - For brevity you can write: "releases, itchio, pages"
-  publish_to: "releases, pages"
+  publish_to: "github_releases, github_pages"
 
   # Itch.io configuration
 
