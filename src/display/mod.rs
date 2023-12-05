@@ -14,6 +14,6 @@ impl Plugin for DisplayPlugin {
 				app.insert_resource(DisplayData { total_score: 0 })
         	.add_systems(OnEnter(GameState::Active), setup)
 					.add_event::<DisplayEvent>()
-          .add_systems(Update, (update_score));
+          .add_systems(Update, update_score);
     }
 }
