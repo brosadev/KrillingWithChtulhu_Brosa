@@ -12,13 +12,13 @@ env:
   # - Write "intel" and "apple" to abbreviate "macos_intel" and "macos_apple_silicon," respectively.
   # - Write "macos" to build for both "intel" and "apple"
   # - Write "web" or "wasm" to build for the web
-  build_for: "web, linux"
+  build_for: "web"
 
   # Releases
 
   # Valid platforms: "github_releases, itchio, github_pages"
   # - For brevity you can write: "releases, itchio, pages"
-  publish_to: "releases, pages"
+  publish_to: "github_releases, github_pages"
 
   # Itch.io configuration
 
