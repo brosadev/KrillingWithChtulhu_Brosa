@@ -11,10 +11,12 @@ mod krill;
 mod map;
 mod physics;
 mod player;
+mod display;
 
 use assets::AssetsPlugin;
 use bevy::{prelude::*, render::camera::ScalingMode};
 use bevy_asset_loader::loading_state::{LoadingState, LoadingStateAppExt};
+use display::DisplayPlugin;
 use krill::KrillPlugin;
 use map::MapPlugin;
 use physics::PhysicsPlugin;
@@ -44,6 +46,7 @@ fn main() {
         )
         .add_plugins(DefaultPlugins)
         // Main Plugins
+				.add_plugins(DisplayPlugin)
         .add_plugins(PhysicsPlugin)
         .add_plugins(AssetsPlugin)
         .add_plugins(PlayerPlugin)
