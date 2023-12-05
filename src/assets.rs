@@ -79,7 +79,7 @@ fn draw_fish(mut commands: Commands, image_assets: Res<ImageAssets>) {
                 ..Default::default()
             },
             //sprite: TextureAtlasSprite::new(0),
-            texture: image_assets.krill.clone(),
+            texture: image_assets.puffer_fish.clone(),
             ..Default::default()
         },
         Name::new("puffer_fish"),
