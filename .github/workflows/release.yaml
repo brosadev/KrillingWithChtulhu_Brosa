@@ -12,7 +12,7 @@ env:
   # - Write "intel" and "apple" to abbreviate "macos_intel" and "macos_apple_silicon," respectively.
   # - Write "macos" to build for both "intel" and "apple"
   # - Write "web" or "wasm" to build for the web
-  build_for: "web, linux"
+  build_for: "web"
 
   # Releases
 
