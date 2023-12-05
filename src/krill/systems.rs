@@ -11,12 +11,18 @@ pub struct KrillBundle {
     sprite: SpriteBundle,
 }
 
+#[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
+pub enum KrillState {
+    #[default]
+    Idle,
+}
+
 pub fn spawn_krill(
     mut commands: Commands,
     // asset_server: Res<AssetServer>,
     image_assets: Res<ImageAssets>,
 ) {
-    commands.spawn(
+    commands.spawn((
         KrillBundle {
             krill: Krill,
             sprite: SpriteBundle {
@@ -30,8 +36,9 @@ pub fn spawn_krill(
                 },
                 ..Default::default()
             },
-        }, // Name::new("Krill"),
-    );
+        },
+        Name::new("Krill"),
+    ));
 }
 pub fn debug_krill(
     mut debug_event_reader: EventReader<DebugEvent>,
@@ -42,5 +49,17 @@ pub fn debug_krill(
         let krill_transform = krill_query.get_single().unwrap();
         info!("{:?}", krill_transform);
         info!("{:?}", krill_transform.forward());
+    }
+}
+
+pub fn krill_idle_movement(mut krill_query: Query<&mut Transform, With<Krill>>, time: Res<Time>) {
+    for mut krill_transform in krill_query.iter_mut() {
+        const IDLE_HIEGHT_SCALAR: f32 = 0.02;
+        const IDLE_FREQ_SCALAR: f32 = 0.2;
+
+        // info!("{:?}", (time.elapsed_seconds() / IDLE_FREQ_SCALAR).sin() * IDLE_HIEGHT_SCALAR;);
+
+        krill_transform.translation.y +=
+            (time.elapsed_seconds() / IDLE_FREQ_SCALAR).sin() * IDLE_HIEGHT_SCALAR;
     }
 }
