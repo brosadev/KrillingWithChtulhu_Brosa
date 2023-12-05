@@ -3,6 +3,16 @@
 version = 3
 
 [[package]]
+name = "KrillingWithChtulhu"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy-inspector-egui",
+ "bevy_asset_loader",
+ "bevy_rapier2d",
+]
+
+[[package]]
 name = "ab_glyph"
 version = "0.2.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2381,16 +2391,6 @@ dependencies = [
  "libc",
  "libloading 0.7.4",
  "pkg-config",
-]
-
-[[package]]
-name = "krilling-with-cthulhu"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy-inspector-egui",
- "bevy_asset_loader",
- "bevy_rapier2d",
 ]
 
 [[package]]

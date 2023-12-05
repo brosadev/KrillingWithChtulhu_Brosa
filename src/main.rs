@@ -3,6 +3,8 @@
 // workflow treats them as errors, so this allows them throughout the project.
 // Feel free to delete this line.
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
+// just for wasm release build
+#![allow(non_snake_case)]
 
 mod assets;
 mod krill;
@@ -13,11 +15,13 @@ mod player;
 use assets::AssetsPlugin;
 use bevy::{prelude::*, render::camera::ScalingMode};
 use bevy_asset_loader::loading_state::{LoadingState, LoadingStateAppExt};
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use krill::KrillPlugin;
 use map::MapPlugin;
 use physics::PhysicsPlugin;
 use player::PlayerPlugin;
+
+#[cfg(feature = "debug")]
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
 pub enum GameState {
@@ -33,14 +37,12 @@ pub struct DebugEvent;
 ///
 /// Requires the feature '2d'
 fn main() {
-    App::new()
-        .add_state::<GameState>()
+    let mut app = App::new();
+    app.add_state::<GameState>()
         .add_loading_state(
             LoadingState::new(GameState::Loading).continue_to_state(GameState::Active),
         )
         .add_plugins(DefaultPlugins)
-        // Development Plugins
-        .add_plugins(WorldInspectorPlugin::new())
         // Main Plugins
         .add_plugins(PhysicsPlugin)
         .add_plugins(AssetsPlugin)
@@ -49,8 +51,13 @@ fn main() {
         .add_plugins(MapPlugin)
         .add_event::<DebugEvent>()
         .add_systems(Startup, setup)
-        .add_systems(Update, debug)
-        .run();
+        .add_systems(Update, debug);
+
+    // Development Plugins
+    #[cfg(feature = "debug")]
+    app.add_plugins(WorldInspectorPlugin::new());
+
+    app.run();
 }
 
 fn setup(mut commands: Commands) {

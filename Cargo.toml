@@ -1,5 +1,5 @@
 [package]
-name = "krilling-with-cthulhu"
+name = "KrillingWithChtulhu"
 version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0 OR CC0-1.0"
@@ -17,6 +17,10 @@ opt-level = 3
 
 [dependencies]
 bevy = "0.12"
-bevy-inspector-egui = "0.21.0"
+bevy-inspector-egui = {version = "0.21.0", optional = true }
 bevy_asset_loader = { version = "0.18.0", features = ["2d"] }
 bevy_rapier2d = "0.23.0"
+
+[features]
+default = ["debug"]
+debug = ["dep:bevy-inspector-egui"]
