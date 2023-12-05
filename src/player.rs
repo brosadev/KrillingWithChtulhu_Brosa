@@ -10,6 +10,14 @@ pub struct PlayerBundle {
     sprite: SpriteBundle,
 }
 
+pub struct PlayerPlugin;
+impl Plugin for PlayerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, spawn_player)
+            .add_systems(Update, player_movement);
+    }
+}
+
 // This function is a very basic movement system that does not incorporate collisions and physics that can be found in Rapier
 
 //This function is likely to evolve as physics become decided

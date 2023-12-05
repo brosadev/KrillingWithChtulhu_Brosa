@@ -3,6 +3,13 @@ use bevy_rapier2d::prelude::*;
 
 //this entire file, is pretty much all temporary until development on a professional tilemap system is configured
 
+pub struct MapPlugin;
+impl Plugin for MapPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, (floor, left_wall, right_wall, ceiling));
+    }
+}
+
 pub fn floor(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
