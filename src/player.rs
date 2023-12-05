@@ -28,16 +28,16 @@ pub fn player_movement(
     time: Res<Time>,
 ) {
     for (mut transform, _) in &mut query {
-        if input.pressed(KeyCode::W) {
+        if input.pressed(KeyCode::W) || input.pressed(KeyCode::Up) {
             transform.translation.y += 400.0 * time.delta_seconds();
         }
-        if input.pressed(KeyCode::D) {
+        if input.pressed(KeyCode::D) || input.pressed(KeyCode::Right) {
             transform.translation.x += 400.0 * time.delta_seconds();
         }
-        if input.pressed(KeyCode::A) {
+        if input.pressed(KeyCode::A) || input.pressed(KeyCode::Left) {
             transform.translation.x -= 400.0 * time.delta_seconds();
         }
-        if input.pressed(KeyCode::S) {
+        if input.pressed(KeyCode::S) || input.pressed(KeyCode::Down) {
             transform.translation.y -= 400.0 * time.delta_seconds();
         }
     }
