@@ -7,11 +7,11 @@
 #![allow(non_snake_case)]
 
 mod assets;
+mod display;
 mod krill;
 mod map;
 mod physics;
 mod player;
-mod display;
 
 use assets::AssetsPlugin;
 use bevy::{prelude::*, render::camera::ScalingMode};
@@ -46,7 +46,7 @@ fn main() {
         )
         .add_plugins(DefaultPlugins)
         // Main Plugins
-				.add_plugins(DisplayPlugin)
+        .add_plugins(DisplayPlugin)
         .add_plugins(PhysicsPlugin)
         .add_plugins(AssetsPlugin)
         .add_plugins(PlayerPlugin)
