@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+use crate::{assets::ImageAssets, GameState};
 const PLAYER_SPEED: f32 = 50.0;
-const PLAYER_SCALE: f32 = 0.25;
+const PLAYER_SCALE: f32 = 0.50;
 const DAMPING: f32 = 3.0;
 
 #[derive(Clone, Eq, PartialEq, Debug, Default, Component)]
@@ -17,7 +18,7 @@ pub struct PlayerBundle {
 pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_player)
+        app.add_systems(OnEnter(GameState::Active), spawn_player)
             .add_systems(Update, player_movement);
     }
 }
@@ -28,10 +29,10 @@ impl Plugin for PlayerPlugin {
 
 pub fn player_movement(
     input: Res<Input<KeyCode>>,
-    mut query: Query<(&mut Transform, &Sprite), With<Player>>,
+    mut query: Query<&mut Transform, With<Player>>,
     time: Res<Time>,
 ) {
-    for (mut transform, _) in &mut query {
+    for mut transform in &mut query {
         if input.pressed(KeyCode::W) || input.pressed(KeyCode::Up) {
             transform.translation.y += PLAYER_SPEED * time.delta_seconds();
         }
@@ -48,18 +49,18 @@ pub fn player_movement(
 }
 
 // This is a very basic player spawn implementation
-pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn spawn_player(mut commands: Commands, image_assets: Res<ImageAssets>) {
     commands.spawn((
         Player,
         Collider::cuboid(2.0, 2.0),
         RigidBody::Dynamic,
-        SpriteBundle {
-            texture: asset_server
-                .load("../assets/kenney_fish-pack/PNG/default_size/fishTile_103.png"),
+        SpriteSheetBundle {
             transform: Transform {
                 scale: Vec3::new(PLAYER_SCALE, PLAYER_SCALE, 1.0),
                 ..Default::default()
             },
+            sprite: TextureAtlasSprite::new(0),
+            texture_atlas: image_assets.whale.clone(),
             ..Default::default()
         },
         //This is the specific area, where you can adjust the bouncing off of walls
