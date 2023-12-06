@@ -2,6 +2,10 @@ use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_rapier2d::prelude::*;
 
 //this entire file, is pretty much all temporary until development on a professional tilemap system is configured
+pub const TOP_BORDER: f32 = 50.;
+pub const RIGHT_BORDER: f32 = 110.;
+pub const BOTTOM_BORDER: f32 = -50.;
+pub const LEFT_BORDER: f32 = -110.;
 
 pub struct MapPlugin;
 impl Plugin for MapPlugin {
