@@ -1,9 +1,7 @@
 use bevy::prelude::*;
 
-use crate::display::systems::{DisplayData, DisplayEvent};
+use self::systems::{setup, update_score, DisplayData, DisplayEvent};
 use crate::GameState;
-
-use self::systems::{setup, update_score};
 
 mod systems;
 
