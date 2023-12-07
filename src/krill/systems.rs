@@ -296,8 +296,7 @@ pub fn boid_seperation(
 
             const ERROR_FROM_ZERO: f32 = 0.05;
             if distance_between_boids < BOID_PERCEPTION_RADIUS
-                && (-ERROR_FROM_ZERO > distance_between_boids
-                    || distance_between_boids > ERROR_FROM_ZERO)
+                && !(-ERROR_FROM_ZERO..=ERROR_FROM_ZERO).contains(&distance_between_boids)
             {
                 // let mut distance_between_boids_as_vec =
                 //     boid_transform_a.translation.xy() - boid_transform_b.translation.xy();
