@@ -2,8 +2,7 @@ use bevy::prelude::*;
 
 use crate::GameState;
 
-use self::systems::{debug_krill, krill_idle_movement, spawn_krill, krill_death, KrillState};
-
+use self::systems::{debug_krill, krill_death, krill_idle_movement, spawn_krill, KrillState};
 mod systems;
 
 pub struct KrillPlugin;
