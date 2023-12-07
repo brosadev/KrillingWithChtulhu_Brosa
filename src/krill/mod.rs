@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::GameState;
 
-use self::systems::{debug_krill, krill_idle_movement, spawn_krill, KrillState};
+use self::systems::{debug_krill, krill_idle_movement, spawn_krill, krill_death, KrillState};
 
 mod systems;
 
@@ -17,6 +17,7 @@ impl Plugin for KrillPlugin {
                 (
                     debug_krill,
                     krill_idle_movement.run_if(in_state(KrillState::Idle)),
+                    krill_death.run_if(in_state(KrillState::Dead)),
                 ),
             );
     }
