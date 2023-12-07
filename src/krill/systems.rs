@@ -15,8 +15,6 @@ use crate::{
 #[derive(Clone, Eq, PartialEq, Debug, Default, Component)]
 pub struct Krill;
 
-
-
 #[derive(Bundle)]
 pub struct KrillBundle {
     krill: Krill,
@@ -29,8 +27,6 @@ pub enum KrillState {
     Idle,
     Dead,
 }
-
-
 
 pub fn spawn_krill(mut commands: Commands, image_assets: Res<ImageAssets>) {
     const STARTING_KRILL: u16 = 150;
@@ -107,7 +103,6 @@ pub fn krill_death(
                 let interpolated_rotation = Quat::slerp(rotation, target_rotation, elapsed_seconds);
                 krill_transform.rotation = interpolated_rotation;
 
-                
                 let light_blue = Color::rgb(0.2, 0.2, 1.0); // Adjust as needed
                                                             // Store the original color
                 let original_color = krill_change.color;
