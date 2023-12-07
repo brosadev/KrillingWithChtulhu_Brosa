@@ -11,6 +11,15 @@ use bevy_asset_loader::prelude::*;
 
 use crate::GameState;
 
+#[derive(Component, Deref, DerefMut)]
+pub struct AnimationTimer(pub Timer);
+
+#[derive(Component)]
+pub struct AnimationIndices {
+    pub first: usize,
+    pub last: usize,
+}
+
 /*
 #[derive(AssetCollection, Resource)]
 struct AudioAssets {
@@ -25,9 +34,11 @@ struct AudioAssets {
 pub struct ImageAssets {
     // if the sheet would have padding, we could set that with `padding_x` and `padding_y`.
     // if there's space between the top left corner of the sheet and the first sprite, we could configure that with `offset_x` and `offset_y`
+    // whale uses a texture atlas as it will be moving while swimming
+    #[asset(texture_atlas(tile_size_x = 32., tile_size_y = 32., columns = 5, rows = 3))]
+    #[asset(path = "whale.png")]
+    pub whale: Handle<TextureAtlas>,
     #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_093.png")]
-    pub krill: Handle<Image>,
-    #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_101.png")]
     pub puffer_fish: Handle<Image>,
     #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_079.png")]
     pub red_fish: Handle<Image>,
@@ -35,6 +46,9 @@ pub struct ImageAssets {
     pub blue_fish: Handle<Image>,
     #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_073.png")]
     pub green_fish: Handle<Image>,
+    #[asset(texture_atlas(tile_size_x = 32., tile_size_y = 32., columns = 2, rows = 1))]
+    #[asset(path = "krill.png")]
+    pub krill: Handle<TextureAtlas>,
 }
 
 pub struct AssetsPlugin;
@@ -42,7 +56,7 @@ pub struct AssetsPlugin;
 impl Plugin for AssetsPlugin {
     fn build(&self, app: &mut App) {
         app.add_collection_to_loading_state::<_, ImageAssets>(GameState::Loading)
-            .add_systems(OnEnter(GameState::Active), draw_fish)
+            //.add_systems(OnEnter(GameState::Active), draw_fish)
             .add_systems(
                 Update,
                 animate_sprite_system.run_if(in_state(GameState::Active)),
@@ -50,17 +64,22 @@ impl Plugin for AssetsPlugin {
     }
 }
 
-#[derive(Component)]
-pub struct AnimationTimer(Timer);
-
 fn animate_sprite_system(
     time: Res<Time>,
-    mut query: Query<(&mut AnimationTimer, &mut TextureAtlasSprite)>,
+    mut query: Query<(
+        &AnimationIndices,
+        &mut AnimationTimer,
+        &mut TextureAtlasSprite,
+    )>,
 ) {
-    for (mut timer, mut sprite) in &mut query {
-        timer.0.tick(time.delta());
-        if timer.0.finished() {
-            sprite.index = (sprite.index + 1) % 8;
+    for (indices, mut timer, mut sprite) in &mut query {
+        timer.tick(time.delta());
+        if timer.just_finished() {
+            sprite.index = if sprite.index == indices.last {
+                indices.first
+            } else {
+                sprite.index + 1
+            };
         }
     }
 }

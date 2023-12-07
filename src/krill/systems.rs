@@ -7,8 +7,10 @@ use bevy_rapier2d::{
 };
 use rand::prelude::*;
 
+const KRILL_SIZE: f32 = 3.;
+
 use crate::{
-    assets::ImageAssets,
+    assets::{AnimationIndices, AnimationTimer, ImageAssets},
     map::{BOTTOM_BORDER, LEFT_BORDER, RIGHT_BORDER, TOP_BORDER},
     DebugEvent,
 };
@@ -29,7 +31,7 @@ const KRILL_FRICTION_COE: f32 = 0.;
 pub struct KrillBundle {
     krill: Krill,
     name: Name,
-    sprite: SpriteBundle,
+    sprite: SpriteSheetBundle,
     // krill_movement: KrillMovement,
     collider: Collider,
     ridgid_body: RigidBody,
@@ -69,46 +71,47 @@ pub fn spawn_krill(mut commands: Commands, image_assets: Res<ImageAssets>) {
         .normalize();
         let random_starting_speed = rand_gen.gen_range(1.0..MAX_SPEED);
 
-        commands.spawn(KrillBundle {
-            krill: Krill,
-            name: Name::new(KRILL),
-            sprite: SpriteBundle {
-                sprite: Sprite {
-                    custom_size: Some(Vec2::new(KRILL_RADIUS * 2., KRILL_RADIUS * 2.)),
+        commands.spawn((
+            KrillBundle {
+                krill: Krill,
+                name: Name::new(KRILL),
+                sprite: SpriteSheetBundle {
+                    sprite: TextureAtlasSprite {
+                        index: 0,
+                        custom_size: Some(Vec2::new(KRILL_SIZE, KRILL_SIZE)),
+                        ..Default::default()
+                    },
+                    texture_atlas: image_assets.krill.clone(),
+                    transform: Transform::from_translation(Vec3::new(random_x, random_y, 1.)),
                     ..Default::default()
                 },
-                texture: image_assets.krill.clone(),
-                transform: Transform::from_translation(Vec3::new(random_x, random_y, 1.))
-                    .with_rotation(Quat::from_rotation_arc_2d(
-                        Vec2::X,
-                        random_starting_vel.xy(),
-                    )),
-                ..Default::default()
-            },
 
-            // Might not be needed with rapier???
+                // Might not be needed with rapier???
 
-            // krill_movement: KrillMovement {
-            //     velocity: random_starting_vel,
-            //     acceleration: Vec3::ONE,
-            //     speed: random_starting_speed,
-            // },
-            collider: Collider::ball(KRILL_RADIUS),
-            collision_group: CollisionGroups {
-                memberships: KRILL_COLLISION_GROUP,
-                filters: Group::complement(KRILL_COLLISION_GROUP),
+                // krill_movement: KrillMovement {
+                //     velocity: random_starting_vel,
+                //     acceleration: Vec3::ONE,
+                //     speed: random_starting_speed,
+                // },
+                collider: Collider::ball(KRILL_RADIUS),
+                collision_group: CollisionGroups {
+                    memberships: KRILL_COLLISION_GROUP,
+                    filters: Group::complement(KRILL_COLLISION_GROUP),
+                },
+                ridgid_body: KRILL_RIGID_BODY,
+                velocity: Velocity::linear(random_starting_vel.xy() * random_starting_speed),
+                restitution: Restitution {
+                    coefficient: KRILL_RESTITUTION_COE,
+                    combine_rule: CoefficientCombineRule::Max,
+                },
+                friction: Friction {
+                    coefficient: KRILL_FRICTION_COE,
+                    combine_rule: CoefficientCombineRule::Min,
+                },
             },
-            ridgid_body: KRILL_RIGID_BODY,
-            velocity: Velocity::linear(random_starting_vel.xy() * random_starting_speed),
-            restitution: Restitution {
-                coefficient: KRILL_RESTITUTION_COE,
-                combine_rule: CoefficientCombineRule::Max,
-            },
-            friction: Friction {
-                coefficient: KRILL_FRICTION_COE,
-                combine_rule: CoefficientCombineRule::Min,
-            },
-        });
+            AnimationIndices { first: 0, last: 1 },
+            AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        ));
     }
 }
 
