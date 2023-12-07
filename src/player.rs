@@ -4,9 +4,19 @@ use bevy_rapier2d::prelude::*;
 const PLAYER_SPEED: f32 = 50.0;
 const PLAYER_SCALE: f32 = 0.25;
 const DAMPING: f32 = 3.0;
+const LASER_SPEED: f32 = 200.0;
+const DESPAWN_DISTANCE: f32 = 1000.0;
 
 #[derive(Clone, Eq, PartialEq, Debug, Default, Component)]
 pub struct Player;
+
+#[derive(Component)]
+pub struct Laser;
+
+#[derive(Component)]
+struct Velocity {
+    linvel: Vec3,
+}
 
 #[derive(Bundle)]
 pub struct PlayerBundle {
@@ -18,7 +28,7 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_player)
-            .add_systems(Update, player_movement);
+            .add_systems(Update, (player_movement, spawn_laser, velocity, despawn));
     }
 }
 
@@ -69,4 +79,47 @@ pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
             angular_damping: DAMPING,
         },
     ));
+}
+
+pub fn spawn_laser(
+    mut commands: Commands,
+    input: Res<Input<KeyCode>>,
+    query: Query<&Transform, With<Player>>,
+) {
+    if input.just_pressed(KeyCode::Space) {
+        if let Ok(player_transform) = query.get_single() {
+            commands
+                .spawn(SpriteBundle {
+                    sprite: Sprite {
+                        color: Color::RED,
+                        custom_size: Some(Vec2::new(5.0, 15.0)),
+                        ..default()
+                    },
+                    transform: Transform {
+                        translation: player_transform.translation + Vec3::Y * 20.0,
+                        ..default()
+                    },
+                    ..default()
+                })
+                .insert(Laser)
+                .insert(Velocity {
+                    linvel: Vec3::new(0.0, LASER_SPEED, 0.0),
+                });
+        }
+    }
+}
+
+fn despawn(mut commands: Commands, query: Query<(Entity, &GlobalTransform)>) {
+    for (entity, transform) in query.iter() {
+        let distance = transform.translation().distance(Vec3::ZERO);
+        if distance > DESPAWN_DISTANCE {
+            commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
+fn velocity(time: Res<Time>, mut query: Query<(&Velocity, &mut Transform)>) {
+    for (velocity, mut transform) in query.iter_mut() {
+        transform.translation += velocity.linvel * time.delta_seconds();
+    }
 }
