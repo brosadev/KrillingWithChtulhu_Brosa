@@ -6,6 +6,7 @@ use bevy_rapier2d::{
     dynamics::{CoefficientCombineRule, RigidBody, Velocity},
     geometry::{Collider, CollisionGroups, Friction, Group, Restitution},
 };
+
 use rand::prelude::*;
 
 use crate::{
@@ -138,6 +139,7 @@ pub enum KrillState {
     #[default]
     Moving,
     Idle,
+    Dead,
 }
 
 pub fn spawn_krill(mut commands: Commands, image_assets: Res<ImageAssets>) {
@@ -368,4 +370,43 @@ pub fn boid_flock(
             + (boid_seperation.vec * sepration_coe.mag)
             + (boid_cohesion.vec * cohesion_coe.mag);
     }
+}
+
+const ROTATION_SPEED: f32 = 0.5;
+
+pub fn krill_death(
+    mut krill_query: Query<(&mut Transform, &mut Sprite), With<Krill>>,
+    time: Res<Time>,
+    mut commands: Commands,
+) {
+    let elapsed_seconds = time.elapsed_seconds();
+    commands.spawn((
+        for (mut krill_transform, mut krill_change) in krill_query.iter_mut() {
+            if elapsed_seconds <= 1.0 {
+                // Rotate smoothly until upside down
+
+                let target_rotation = Quat::from_rotation_x(-std::f32::consts::PI); // Upside down
+                let rotation = Quat::from_rotation_x(elapsed_seconds * ROTATION_SPEED.to_radians());
+                let interpolated_rotation = Quat::slerp(rotation, target_rotation, elapsed_seconds);
+                krill_transform.rotation = interpolated_rotation;
+
+                let light_blue = Color::rgb(0.2, 0.2, 1.0); // Adjust as needed
+                                                            // Store the original color
+                let original_color = krill_change.color;
+                // Adjust the speed of color change by introducing a color change speed factor
+                let color_change_speed_factor = 0.4; // Adjust as needed
+                                                     // Manually interpolate color components
+                let factor = elapsed_seconds / (1.0 * color_change_speed_factor); // Assuming 1.0 seconds for the color transition
+                krill_change
+                    .color
+                    .set_r((1.0 - factor) * original_color.r() + factor * light_blue.r());
+                krill_change
+                    .color
+                    .set_g((1.0 - factor) * original_color.g() + factor * light_blue.g());
+                krill_change
+                    .color
+                    .set_b((1.0 - factor) * original_color.b() + factor * light_blue.b());
+            }
+        },
+    ));
 }

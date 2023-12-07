@@ -31,6 +31,7 @@ impl Plugin for KrillPlugin {
                         .chain())
                     .run_if(in_state(KrillState::Moving)),
                     // krill_movement.run_if(in_state(KrillState::Moving)),
+                    krill_death.run_if(in_state(KrillState::Dead)),
                 ),
             );
     }
