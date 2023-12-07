@@ -17,6 +17,7 @@ impl Plugin for KrillPlugin {
                 (
                     debug_krill,
                     krill_idle_movement.run_if(in_state(KrillState::Idle)),
+                    // krill_movement.run_if(in_state(KrillState::Moving)),
                 ),
             );
     }

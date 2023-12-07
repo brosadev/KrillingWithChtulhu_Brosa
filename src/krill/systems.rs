@@ -1,6 +1,10 @@
 use std::ops::Range;
 
 use bevy::prelude::*;
+use bevy_rapier2d::{
+    dynamics::{CoefficientCombineRule, RigidBody, Velocity},
+    geometry::{Collider, CollisionGroups, Friction, Group, Restitution},
+};
 use rand::prelude::*;
 
 use crate::{
@@ -9,45 +13,102 @@ use crate::{
     DebugEvent,
 };
 
-#[derive(Clone, Eq, PartialEq, Debug, Default, Component)]
-pub struct Krill;
+const KRILL: &str = "Krill";
+const STARTING_KRILL: u16 = 2500;
+pub const KRILL_RADIUS: f32 = 1.5;
+const SPAWN_X_RANGE: Range<f32> = LEFT_BORDER..RIGHT_BORDER;
+const SPAWN_Y_RANGE: Range<f32> = BOTTOM_BORDER..TOP_BORDER;
+pub const MAX_SPEED: f32 = 40.;
+// pub const MAX_FORCE: f32 = 1.;
+pub const KRILL_COLLISION_GROUP: Group = Group::GROUP_1;
+const KRILL_RIGID_BODY: RigidBody = RigidBody::Dynamic;
+const KRILL_RESTITUTION_COE: f32 = 1.;
+const KRILL_FRICTION_COE: f32 = 0.;
 
 #[derive(Bundle)]
 pub struct KrillBundle {
     krill: Krill,
+    name: Name,
     sprite: SpriteBundle,
+    // krill_movement: KrillMovement,
+    collider: Collider,
+    ridgid_body: RigidBody,
+    velocity: Velocity,
+    restitution: Restitution,
+    friction: Friction,
+    collision_group: CollisionGroups,
 }
+#[derive(Clone, Eq, PartialEq, Debug, Default, Component)]
+pub struct Krill;
+
+// #[derive(Clone, PartialEq, Debug, Default, Component)]
+// pub struct KrillMovement {
+//     velocity: Vec3,
+//     acceleration: Vec3,
+//     speed: f32,
+// }
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
 pub enum KrillState {
     #[default]
+    Moving,
     Idle,
 }
 
 pub fn spawn_krill(mut commands: Commands, image_assets: Res<ImageAssets>) {
-    const STARTING_KRILL: u16 = 150;
-    const SPAWN_X_RANGE: Range<f32> = LEFT_BORDER..RIGHT_BORDER;
-    const SPAWN_Y_RANGE: Range<f32> = BOTTOM_BORDER..TOP_BORDER;
     let mut rand_gen = thread_rng();
 
     for _ in 0..STARTING_KRILL {
         let random_x = rand_gen.gen_range(SPAWN_X_RANGE);
         let random_y = rand_gen.gen_range(SPAWN_Y_RANGE);
-        commands.spawn((
-            KrillBundle {
-                krill: Krill,
-                sprite: SpriteBundle {
-                    sprite: Sprite {
-                        custom_size: Some(Vec2::new(3., 3.)),
-                        ..Default::default()
-                    },
-                    texture: image_assets.krill.clone(),
-                    transform: Transform::from_translation(Vec3::new(random_x, random_y, 1.)),
+        let random_starting_vel = Vec3::new(
+            rand_gen.gen_range(-1.0..1.0),
+            rand_gen.gen_range(-1.0..1.0),
+            0.,
+        )
+        .normalize();
+        let random_starting_speed = rand_gen.gen_range(1.0..MAX_SPEED);
+
+        commands.spawn(KrillBundle {
+            krill: Krill,
+            name: Name::new(KRILL),
+            sprite: SpriteBundle {
+                sprite: Sprite {
+                    custom_size: Some(Vec2::new(KRILL_RADIUS * 2., KRILL_RADIUS * 2.)),
                     ..Default::default()
                 },
+                texture: image_assets.krill.clone(),
+                transform: Transform::from_translation(Vec3::new(random_x, random_y, 1.))
+                    .with_rotation(Quat::from_rotation_arc_2d(
+                        Vec2::X,
+                        random_starting_vel.xy(),
+                    )),
+                ..Default::default()
             },
-            Name::new("Krill"),
-        ));
+
+            // Might not be needed with rapier???
+
+            // krill_movement: KrillMovement {
+            //     velocity: random_starting_vel,
+            //     acceleration: Vec3::ONE,
+            //     speed: random_starting_speed,
+            // },
+            collider: Collider::ball(KRILL_RADIUS),
+            collision_group: CollisionGroups {
+                memberships: KRILL_COLLISION_GROUP,
+                filters: Group::complement(KRILL_COLLISION_GROUP),
+            },
+            ridgid_body: KRILL_RIGID_BODY,
+            velocity: Velocity::linear(random_starting_vel.xy() * random_starting_speed),
+            restitution: Restitution {
+                coefficient: KRILL_RESTITUTION_COE,
+                combine_rule: CoefficientCombineRule::Max,
+            },
+            friction: Friction {
+                coefficient: KRILL_FRICTION_COE,
+                combine_rule: CoefficientCombineRule::Min,
+            },
+        });
     }
 }
 
@@ -67,12 +128,27 @@ pub fn krill_idle_movement(mut krill_query: Query<&mut Transform, With<Krill>>, 
     for mut krill_transform in krill_query.iter_mut() {
         const IDLE_HIEGHT_SCALAR: f32 = 0.005;
         const IDLE_FREQ_SCALAR: f32 = 0.1;
+        const IDLE_PERIOD_SCALAR: f32 = 20.;
 
         // info!("{:?}", (time.elapsed_seconds() / IDLE_FREQ_SCALAR).sin() * IDLE_HIEGHT_SCALAR;);
 
         krill_transform.translation.y += (time.elapsed_seconds()
-            - (krill_transform.translation.x / 5.) / IDLE_FREQ_SCALAR)
+            - (krill_transform.translation.x / IDLE_PERIOD_SCALAR) / IDLE_FREQ_SCALAR)
             .sin()
             * IDLE_HIEGHT_SCALAR;
     }
 }
+
+// pub fn krill_movement(
+//     mut krill_query: Query<(&mut Transform, &KrillMovement), With<Krill>>,
+//     time: Res<Time>,
+// ) {
+//     // info!("krill moving");
+
+//     for (mut krill_transform, krill_movement) in krill_query.iter_mut() {
+//         krill_transform.translation += krill_movement.velocity
+//             * krill_movement.acceleration
+//             * krill_movement.speed
+//             * time.delta_seconds();
+//     }
+// }
