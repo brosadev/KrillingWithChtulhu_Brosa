@@ -54,7 +54,7 @@ fn main() {
         .add_plugins(MapPlugin)
         .add_event::<DebugEvent>()
         .add_systems(Startup, setup)
-        .add_systems(Update, debug);
+        .add_systems(Update, (debug, bevy::window::close_on_esc));
 
     // Development Plugins
     #[cfg(feature = "debug")]
@@ -73,7 +73,7 @@ fn setup(mut commands: Commands) {
 }
 
 pub fn debug(keyboard_input: Res<Input<KeyCode>>, mut debug_event_writer: EventWriter<DebugEvent>) {
-    if keyboard_input.just_pressed(KeyCode::Tab) {
+    if keyboard_input.just_pressed(KeyCode::Q) {
         debug_event_writer.send(DebugEvent);
     }
 }

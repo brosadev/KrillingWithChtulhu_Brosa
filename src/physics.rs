@@ -12,7 +12,7 @@ impl Plugin for PhysicsPlugin {
                 gravity: Vect::ZERO,
                 ..Default::default()
             })
-            .add_plugins(RapierDebugRenderPlugin::default())
+            .add_plugins(RapierDebugRenderPlugin::default().disabled())
             .add_systems(Update, velocity);
     }
 }
