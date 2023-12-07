@@ -3,8 +3,10 @@ use std::ops::Range;
 use bevy::prelude::*;
 use rand::prelude::*;
 
+const KRILL_SIZE: f32 = 3.;
+
 use crate::{
-    assets::ImageAssets,
+    assets::{AnimationIndices, AnimationTimer, ImageAssets},
     map::{BOTTOM_BORDER, LEFT_BORDER, RIGHT_BORDER, TOP_BORDER},
     DebugEvent,
 };
@@ -15,7 +17,7 @@ pub struct Krill;
 #[derive(Bundle)]
 pub struct KrillBundle {
     krill: Krill,
-    sprite: SpriteBundle,
+    sprite: SpriteSheetBundle,
 }
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
@@ -33,20 +35,24 @@ pub fn spawn_krill(mut commands: Commands, image_assets: Res<ImageAssets>) {
     for _ in 0..STARTING_KRILL {
         let random_x = rand_gen.gen_range(SPAWN_X_RANGE);
         let random_y = rand_gen.gen_range(SPAWN_Y_RANGE);
+
         commands.spawn((
             KrillBundle {
                 krill: Krill,
-                sprite: SpriteBundle {
-                    sprite: Sprite {
-                        custom_size: Some(Vec2::new(3., 3.)),
+                sprite: SpriteSheetBundle {
+                    sprite: TextureAtlasSprite {
+                        index: 0,
+                        custom_size: Some(Vec2::new(KRILL_SIZE, KRILL_SIZE)),
                         ..Default::default()
                     },
-                    texture: image_assets.krill.clone(),
+                    texture_atlas: image_assets.krill.clone(),
                     transform: Transform::from_translation(Vec3::new(random_x, random_y, 1.)),
                     ..Default::default()
                 },
             },
             Name::new("Krill"),
+            AnimationIndices { first: 0, last: 1 },
+            AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
         ));
     }
 }

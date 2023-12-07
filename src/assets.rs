@@ -11,6 +11,15 @@ use bevy_asset_loader::prelude::*;
 
 use crate::GameState;
 
+#[derive(Component, Deref, DerefMut)]
+pub struct AnimationTimer(pub Timer);
+
+#[derive(Component)]
+pub struct AnimationIndices {
+    pub first: usize,
+    pub last: usize,
+}
+
 /*
 #[derive(AssetCollection, Resource)]
 struct AudioAssets {
@@ -30,8 +39,6 @@ pub struct ImageAssets {
     #[asset(path = "whale.png")]
     pub whale: Handle<TextureAtlas>,
     #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_093.png")]
-    pub krill: Handle<Image>,
-    #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_101.png")]
     pub puffer_fish: Handle<Image>,
     #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_079.png")]
     pub red_fish: Handle<Image>,
@@ -39,6 +46,9 @@ pub struct ImageAssets {
     pub blue_fish: Handle<Image>,
     #[asset(path = "kenney_fish-pack/PNG/default_size/fishTile_073.png")]
     pub green_fish: Handle<Image>,
+    #[asset(texture_atlas(tile_size_x = 32., tile_size_y = 32., columns = 2, rows = 1))]
+    #[asset(path = "krill.png")]
+    pub krill: Handle<TextureAtlas>,
 }
 
 pub struct AssetsPlugin;
@@ -54,17 +64,22 @@ impl Plugin for AssetsPlugin {
     }
 }
 
-#[derive(Component)]
-pub struct AnimationTimer(Timer);
-
 fn animate_sprite_system(
     time: Res<Time>,
-    mut query: Query<(&mut AnimationTimer, &mut TextureAtlasSprite)>,
+    mut query: Query<(
+        &AnimationIndices,
+        &mut AnimationTimer,
+        &mut TextureAtlasSprite,
+    )>,
 ) {
-    for (mut timer, mut sprite) in &mut query {
-        timer.0.tick(time.delta());
-        if timer.0.finished() {
-            sprite.index = (sprite.index + 1) % 8;
+    for (indices, mut timer, mut sprite) in &mut query {
+        timer.tick(time.delta());
+        if timer.just_finished() {
+            sprite.index = if sprite.index == indices.last {
+                indices.first
+            } else {
+                sprite.index + 1
+            };
         }
     }
 }
