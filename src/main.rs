@@ -54,7 +54,7 @@ fn main() {
         .add_plugins(MapPlugin)
         .add_event::<DebugEvent>()
         .add_systems(Startup, setup)
-        .add_systems(Update, debug);
+        .add_systems(Update, (debug, bevy::window::close_on_esc));
 
     // Development Plugins
     #[cfg(feature = "debug")]

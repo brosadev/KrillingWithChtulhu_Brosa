@@ -1,6 +1,7 @@
 use std::ops::Range;
 
 use bevy::prelude::*;
+use bevy_inspector_egui::{inspector_options::ReflectInspectorOptions, InspectorOptions};
 use bevy_rapier2d::{
     dynamics::{CoefficientCombineRule, RigidBody, Velocity},
     geometry::{Collider, CollisionGroups, Friction, Group, Restitution},
@@ -16,16 +17,16 @@ use crate::{
 const SPAWN_X_RANGE: Range<f32> = LEFT_BORDER..RIGHT_BORDER;
 const SPAWN_Y_RANGE: Range<f32> = BOTTOM_BORDER..TOP_BORDER;
 
-pub const BOID_MAX_FORCE: f32 = 0.2;
+pub const BOID_MAX_FORCE: f32 = 1.2;
 pub const BOID_ALIGN_MAG: f32 = 0.5;
-pub const BOID_SEPERATION_MAG: f32 = 0.2;
-pub const BOID_CHOESION_MAG: f32 = 0.1;
+pub const BOID_SEPERATION_MAG: f32 = 1.5;
+pub const BOID_CHOESION_MAG: f32 = 0.5;
 pub const BOID_PERCEPTION_RADIUS: f32 = 2.;
 
 const KRILL: &str = "Krill";
-const KRILL_ENTITYS_STARTING_AMT: u16 = 200;
+const KRILL_ENTITYS_STARTING_AMT: u16 = 600;
 pub const KRILL_RADIUS: f32 = 2.5;
-pub const KRILL_MAX_SPEED: f32 = 30.;
+pub const KRILL_MAX_SPEED: f32 = 50.;
 pub const KRILL_COLLISION_GROUP: Group = Group::GROUP_1;
 const KRILL_RIGID_BODY: RigidBody = RigidBody::Dynamic;
 const KRILL_RESTITUTION_COE: f32 = 1.;
@@ -44,10 +45,16 @@ pub struct BoidBundle {
 #[derive(Clone, Eq, PartialEq, Debug, Default, Component)]
 pub struct Boid;
 
-#[derive(Clone, PartialEq, Debug, Default, Component)]
+#[derive(Clone, PartialEq, Debug, Default, Component, Reflect, InspectorOptions)]
+#[reflect(Component, InspectorOptions)]
 pub struct Acceleration {
     vec: Vec2,
 }
+
+// #[derive(Clone, PartialEq, Debug, Default, Component)]
+// pub struct Nieghbors {
+//     vec: Vec<,
+// }
 
 #[derive(Clone, PartialEq, Debug, Default, Component)]
 pub struct Align {
@@ -62,6 +69,51 @@ pub struct Seperation {
 #[derive(Clone, PartialEq, Debug, Default, Component)]
 pub struct Cohesion {
     vec: Vec2,
+}
+
+#[derive(Resource, InspectorOptions, Reflect)]
+#[reflect(Resource, InspectorOptions)]
+pub struct AlignCoe {
+    #[inspector(min = 0.0)]
+    pub mag: f32,
+}
+
+impl Default for AlignCoe {
+    fn default() -> Self {
+        Self {
+            mag: BOID_ALIGN_MAG,
+        }
+    }
+}
+
+#[derive(Resource, InspectorOptions, Reflect)]
+#[reflect(Resource, InspectorOptions)]
+pub struct SeperationCoe {
+    #[inspector(min = 0.0)]
+    pub mag: f32,
+}
+
+impl Default for SeperationCoe {
+    fn default() -> Self {
+        Self {
+            mag: BOID_SEPERATION_MAG,
+        }
+    }
+}
+
+#[derive(Resource, InspectorOptions, Reflect)]
+#[reflect(Resource, InspectorOptions)]
+pub struct CohesionCoe {
+    #[inspector(min = 0.0)]
+    pub mag: f32,
+}
+
+impl Default for CohesionCoe {
+    fn default() -> Self {
+        Self {
+            mag: BOID_CHOESION_MAG,
+        }
+    }
 }
 
 #[derive(Bundle)]
@@ -180,10 +232,9 @@ pub fn krill_update_velocity(
     mut krill_query: Query<(&mut Velocity, &mut Acceleration), With<Krill>>,
     time: Res<Time>,
 ) {
-    for (mut krill_velocity, mut krill_acceleration) in krill_query.iter_mut() {
+    for (mut krill_velocity, krill_acceleration) in krill_query.iter_mut() {
         krill_velocity.linvel += krill_acceleration.vec * time.delta_seconds();
         krill_velocity.linvel.clamp_length_max(KRILL_MAX_SPEED);
-        krill_acceleration.vec = Vec2::ZERO;
     }
 }
 
@@ -194,6 +245,7 @@ pub fn boid_align(
     for (boid_entity_a, boid_transform_a, boid_velocity_a, mut boid_align_a) in
         boid_a_query.iter_mut()
     {
+        boid_align_a.vec = Vec2::ZERO;
         let mut num_near_boids: u32 = 0;
 
         for (boid_entity_b, boid_transform_b, boid_velocity_b) in boid_b_query.iter() {
@@ -228,6 +280,7 @@ pub fn boid_seperation(
     for (boid_entity_a, boid_transform_a, boid_velocity_a, mut boid_sepreation_a) in
         boid_a_query.iter_mut()
     {
+        boid_sepreation_a.vec = Vec2::ZERO;
         let mut num_near_boids: u32 = 0;
 
         for (boid_entity_b, boid_transform_b) in boid_b_query.iter() {
@@ -239,11 +292,19 @@ pub fn boid_seperation(
                 .translation
                 .distance(boid_transform_b.translation);
 
-            if distance_between_boids < BOID_PERCEPTION_RADIUS {
-                let mut distance_between_boids_as_vec =
-                    boid_transform_a.translation.xy() - boid_transform_b.translation.xy();
-                distance_between_boids_as_vec /= distance_between_boids * distance_between_boids;
-                boid_sepreation_a.vec += distance_between_boids_as_vec;
+            const ERROR_FROM_ZERO: f32 = 0.05;
+            if distance_between_boids < BOID_PERCEPTION_RADIUS
+                && (-ERROR_FROM_ZERO > distance_between_boids
+                    || distance_between_boids > ERROR_FROM_ZERO)
+            {
+                // let mut distance_between_boids_as_vec =
+                //     boid_transform_a.translation.xy() - boid_transform_b.translation.xy();
+                // distance_between_boids_as_vec /= distance_between_boids * distance_between_boids;
+                // boid_sepreation_a.vec += distance_between_boids_as_vec;
+                boid_sepreation_a.vec -= (boid_transform_b.translation.xy()
+                    - boid_transform_a.translation.xy())
+                .normalize()
+                    / distance_between_boids;
                 num_near_boids += 1;
             }
         }
@@ -264,6 +325,7 @@ pub fn boid_cohesion(
     for (boid_entity_a, boid_transform_a, boid_velocity_a, mut boid_coehesion_a) in
         boid_a_query.iter_mut()
     {
+        boid_coehesion_a.vec = Vec2::ZERO;
         let mut num_near_boids: u32 = 0;
 
         for (boid_entity_b, boid_transform_b) in boid_b_query.iter() {
@@ -274,7 +336,7 @@ pub fn boid_cohesion(
             if boid_transform_a
                 .translation
                 .distance(boid_transform_b.translation)
-                < BOID_PERCEPTION_RADIUS * 2.
+                < BOID_PERCEPTION_RADIUS
             {
                 boid_coehesion_a.vec += boid_transform_b.translation.xy();
                 num_near_boids += 1;
@@ -285,8 +347,9 @@ pub fn boid_cohesion(
 
         if num_near_boids > 0 {
             boid_coehesion_a.vec /= num_near_boids as f32;
-            boid_coehesion_a.vec = boid_coehesion_a.vec.normalize() * KRILL_MAX_SPEED
-                - boid_transform_a.translation.xy()
+            boid_coehesion_a.vec = (boid_coehesion_a.vec - boid_transform_a.translation.xy())
+                .normalize()
+                * KRILL_MAX_SPEED
                 - boid_velocity_a.linvel;
             boid_coehesion_a.vec.clamp_length_max(BOID_MAX_FORCE);
         }
@@ -295,11 +358,14 @@ pub fn boid_cohesion(
 
 pub fn boid_flock(
     mut boid_query: Query<(&mut Acceleration, &Align, &Seperation, &Cohesion), With<Boid>>,
+    align_coe: Res<AlignCoe>,
+    sepration_coe: Res<SeperationCoe>,
+    cohesion_coe: Res<CohesionCoe>,
 ) {
     for (mut boid_acceleration, boid_align, boid_seperation, boid_cohesion) in boid_query.iter_mut()
     {
-        boid_acceleration.vec += (boid_align.vec * BOID_ALIGN_MAG)
-            + (boid_seperation.vec * BOID_SEPERATION_MAG)
-            + (boid_cohesion.vec * BOID_CHOESION_MAG);
+        boid_acceleration.vec = (boid_align.vec * align_coe.mag)
+            + (boid_seperation.vec * sepration_coe.mag)
+            + (boid_cohesion.vec * cohesion_coe.mag);
     }
 }
