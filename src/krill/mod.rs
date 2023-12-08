@@ -26,12 +26,12 @@ impl Plugin for KrillPlugin {
                     krill_idle_movement.run_if(in_state(KrillState::Idle)),
                     ((
                         ((boid_align, boid_seperation, boid_cohesion), boid_flock).chain(),
+                        (krill_avoid_player, krill_avoid_obstical).chain(),
                         (krill_update_velocity, krill_rotate_to_face_vel_vec).chain(),
                     )
                         .chain())
                     .run_if(in_state(KrillState::Moving)),
-                    // krill_movement.run_if(in_state(KrillState::Moving)),
-                    krill_death.run_if(in_state(KrillState::Dead)),
+                    // krill_death.run_if(in_state(KrillState::Dead)),
                 ),
             );
     }
