@@ -87,13 +87,9 @@ pub fn spawn_player(mut commands: Commands, image_assets: Res<ImageAssets>) {
             },
         ))
         .insert(ActiveEvents::COLLISION_EVENTS);
-
 }
 
-fn eat_krill(
-    mut commands: Commands,
-    mut events: EventReader<CollisionEvent>,
-) {
+fn eat_krill(mut commands: Commands, mut events: EventReader<CollisionEvent>) {
     for event in events.iter() {
         match event {
             CollisionEvent::Started(_, b, _) => {
