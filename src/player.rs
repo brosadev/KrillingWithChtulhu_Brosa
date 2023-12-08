@@ -103,7 +103,7 @@ pub fn spawn_player(mut commands: Commands, image_assets: Res<ImageAssets>) {
 }
 
 fn eat_krill(mut commands: Commands, mut events: EventReader<CollisionEvent>) {
-    for event in events.iter() {
+    for event in events.read() {
         match event {
             CollisionEvent::Started(_, b, _) => {
                 commands.entity(*b).despawn();
@@ -138,7 +138,7 @@ pub fn spawn_laser(
                 .insert(Laser)
                 .insert(Velocity {
                     linvel: direction * LASER_SPEED,
-                });
+                })     .insert(ActiveEvents::COLLISION_EVENTS);
         }
     }
 }
