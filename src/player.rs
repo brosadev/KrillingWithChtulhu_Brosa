@@ -138,7 +138,8 @@ pub fn spawn_laser(
                 .insert(Laser)
                 .insert(Velocity {
                     linvel: direction * LASER_SPEED,
-                })     .insert(ActiveEvents::COLLISION_EVENTS);
+                })
+                .insert(ActiveEvents::COLLISION_EVENTS);
         }
     }
 }
