@@ -1,5 +1,5 @@
 use bevy::sprite::collide_aabb::Collision;
-use bevy::{prelude::*, ecs::event::event_update_condition};
+use bevy::{ecs::event::event_update_condition, prelude::*};
 use bevy_rapier2d::prelude::*;
 
 use crate::krill::systems::Krill;
@@ -32,7 +32,11 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::Active), spawn_player)
-            .add_systems(Update, (player_movement, spawn_laser, velocity, despawn, eat_krill)) ;   }
+            .add_systems(
+                Update,
+                (player_movement, spawn_laser, velocity, despawn, eat_krill),
+            );
+    }
 }
 
 // This function is a very basic movement system that does not incorporate collisions and physics that can be found in Rapier
@@ -62,27 +66,28 @@ pub fn player_movement(
 
 // This is a very basic player spawn implementation
 pub fn spawn_player(mut commands: Commands, image_assets: Res<ImageAssets>) {
-    commands.spawn((
-        Player,
-        Collider::cuboid(2.0, 2.0),
-        RigidBody::Dynamic,
-        SpriteSheetBundle {
-            transform: Transform {
-                scale: Vec3::new(PLAYER_SCALE, PLAYER_SCALE, 1.0),
+    commands
+        .spawn((
+            Player,
+            Collider::cuboid(2.0, 2.0),
+            RigidBody::Dynamic,
+            SpriteSheetBundle {
+                transform: Transform {
+                    scale: Vec3::new(PLAYER_SCALE, PLAYER_SCALE, 1.0),
+                    ..Default::default()
+                },
+                sprite: TextureAtlasSprite::new(0),
+                texture_atlas: image_assets.whale.clone(),
                 ..Default::default()
             },
-            sprite: TextureAtlasSprite::new(0),
-            texture_atlas: image_assets.whale.clone(),
-            ..Default::default()
-        },
-        //This is the specific area, where you can adjust the bouncing off of walls
-        // You can add and play with much more here in regards to physics
-        Damping {
-            linear_damping: DAMPING,
-            angular_damping: DAMPING,
-        },
-    )).insert(ActiveEvents::COLLISION_EVENTS);
-
+            //This is the specific area, where you can adjust the bouncing off of walls
+            // You can add and play with much more here in regards to physics
+            Damping {
+                linear_damping: DAMPING,
+                angular_damping: DAMPING,
+            },
+        ))
+        .insert(ActiveEvents::COLLISION_EVENTS);
 
     //AdventOFCode
 }
@@ -93,14 +98,12 @@ fn eat_krill(
     krill_query: Query<Entity, With<Krill>>,
     player_query: Query<Entity, With<Player>>,
 ) {
-    for event in events.iter(){
+    for event in events.iter() {
         match event {
             CollisionEvent::Started(a, b, _) => {
                 commands.entity(*b).despawn();
             }
-            CollisionEvent::Stopped(_a, _b , _) => {
-
-            }
+            CollisionEvent::Stopped(_a, _b, _) => {}
         }
     }
 }
