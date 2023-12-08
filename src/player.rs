@@ -9,6 +9,7 @@ const PLAYER_SCALE: f32 = 0.50;
 const DAMPING: f32 = 3.0;
 const LASER_SPEED: f32 = 200.0;
 const DESPAWN_DISTANCE: f32 = 1000.0;
+const ROTATION_SPEED: f32 = 10.0;
 
 #[derive(Clone, Eq, PartialEq, Debug, Default, Component)]
 pub struct Player;
@@ -41,24 +42,36 @@ impl Plugin for PlayerPlugin {
 // This function is a very basic movement system that does not incorporate collisions and physics that can be found in Rapier
 
 //This function is likely to evolve as physics become decided
-
 pub fn player_movement(
     input: Res<Input<KeyCode>>,
     mut query: Query<&mut Transform, With<Player>>,
     time: Res<Time>,
 ) {
     for mut transform in &mut query {
+        let mut target_direction = Vec3::ZERO;
+
         if input.pressed(KeyCode::W) || input.pressed(KeyCode::Up) {
+            target_direction -= Vec3::X;
             transform.translation.y += PLAYER_SPEED * time.delta_seconds();
         }
         if input.pressed(KeyCode::D) || input.pressed(KeyCode::Right) {
+            target_direction += Vec3::Y;
             transform.translation.x += PLAYER_SPEED * time.delta_seconds();
         }
         if input.pressed(KeyCode::A) || input.pressed(KeyCode::Left) {
+            target_direction -= Vec3::Y;
             transform.translation.x -= PLAYER_SPEED * time.delta_seconds();
         }
         if input.pressed(KeyCode::S) || input.pressed(KeyCode::Down) {
+            target_direction += Vec3::X;
             transform.translation.y -= PLAYER_SPEED * time.delta_seconds();
+        }
+
+        if target_direction != Vec3::ZERO {
+            let target_rotation = Quat::from_rotation_arc(Vec3::Y, target_direction.normalize());
+            transform.rotation = transform
+                .rotation
+                .slerp(target_rotation, ROTATION_SPEED * time.delta_seconds());
         }
     }
 }
@@ -107,6 +120,7 @@ pub fn spawn_laser(
 ) {
     if input.just_pressed(KeyCode::Space) {
         if let Ok(player_transform) = query.get_single() {
+            let direction = player_transform.rotation.mul_vec3(Vec3::X).normalize();
             commands
                 .spawn(SpriteBundle {
                     sprite: Sprite {
@@ -115,14 +129,15 @@ pub fn spawn_laser(
                         ..default()
                     },
                     transform: Transform {
-                        translation: player_transform.translation + Vec3::Y * 20.0,
+                        translation: player_transform.translation + direction * 20.0,
+                        rotation: player_transform.rotation,
                         ..default()
                     },
                     ..default()
                 })
                 .insert(Laser)
                 .insert(Velocity {
-                    linvel: Vec3::new(0.0, LASER_SPEED, 0.0),
+                    linvel: direction * LASER_SPEED,
                 });
         }
     }
