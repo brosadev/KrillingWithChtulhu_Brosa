@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{assets::ImageAssets, GameState};
+use crate::{assets::ImageAssets, GameState, krill};
 const PLAYER_SPEED: f32 = 50.0;
 const PLAYER_SCALE: f32 = 0.50;
 const DAMPING: f32 = 3.0;
@@ -122,5 +122,23 @@ fn despawn(mut commands: Commands, query: Query<(Entity, &GlobalTransform)>) {
 fn velocity(time: Res<Time>, mut query: Query<(&Velocity, &mut Transform)>) {
     for (velocity, mut transform) in query.iter_mut() {
         transform.translation += velocity.linvel * time.delta_seconds();
+    }
+}
+
+fn player_eat_krill(
+    mut commands: Commands,
+    mut events: EventReader<CollisionEvent>,
+    krill_query: Query<Entity, With<Krill>,
+    player_query: Query<Entity, With<Player>>,
+) {
+    for event in events.iter() {
+        match event {
+
+            CollisionEvent::Started(Entity1, Entity2, _ ) => {
+                if (is_entity1_krill && is_entity2_player) || (is_entity2_krill && is_entity1_player) {
+                    commands.entity(if is_entity1_krill { *entity1 } else { *entity2 }).despawn_recursive();
+                }
+            }
+        }
     }
 }
