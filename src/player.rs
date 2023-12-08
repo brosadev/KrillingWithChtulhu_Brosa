@@ -1,8 +1,7 @@
-use bevy::sprite::collide_aabb::Collision;
-use bevy::{ecs::event::event_update_condition, prelude::*};
+// use bevy::sprite::collide_aabb::Collision;
+// use bevy::{ecs::event::event_update_condition, prelude::*};
+use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-
-use crate::krill::systems::Krill;
 
 use crate::{assets::ImageAssets, GameState};
 const PLAYER_SPEED: f32 = 50.0;
@@ -89,18 +88,15 @@ pub fn spawn_player(mut commands: Commands, image_assets: Res<ImageAssets>) {
         ))
         .insert(ActiveEvents::COLLISION_EVENTS);
 
-    //AdventOFCode
 }
 
 fn eat_krill(
     mut commands: Commands,
     mut events: EventReader<CollisionEvent>,
-    krill_query: Query<Entity, With<Krill>>,
-    player_query: Query<Entity, With<Player>>,
 ) {
     for event in events.iter() {
         match event {
-            CollisionEvent::Started(a, b, _) => {
+            CollisionEvent::Started(_, b, _) => {
                 commands.entity(*b).despawn();
             }
             CollisionEvent::Stopped(_a, _b, _) => {}
