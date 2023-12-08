@@ -14,12 +14,21 @@ impl Plugin for MapPlugin {
     }
 }
 
+#[derive(Component, Debug, Clone)]
+pub enum Obstacal {
+    Floor,
+    Ceiling,
+    RightWall,
+    LeftWall,
+}
+
 pub fn floor(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     commands.spawn((
+        Obstacal::Floor,
         RigidBody::Fixed,
         Collider::cuboid(280.0, 10.0),
         MaterialMesh2dBundle {
@@ -39,6 +48,7 @@ pub fn ceiling(
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     commands.spawn((
+        Obstacal::Ceiling,
         RigidBody::Fixed,
         Collider::cuboid(280.0, 10.0),
         MaterialMesh2dBundle {
@@ -58,6 +68,7 @@ pub fn left_wall(
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     commands.spawn((
+        Obstacal::LeftWall,
         RigidBody::Fixed,
         Collider::cuboid(10.0, 130.0),
         MaterialMesh2dBundle {
@@ -77,6 +88,7 @@ pub fn right_wall(
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     commands.spawn((
+        Obstacal::RightWall,
         RigidBody::Fixed,
         Collider::cuboid(10.0, 130.0),
         MaterialMesh2dBundle {
