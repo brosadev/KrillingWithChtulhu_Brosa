@@ -336,14 +336,12 @@ pub fn boid_cohesion(
             if boid_transform_a
                 .translation
                 .distance(boid_transform_b.translation)
-                < BOID_PERCEPTION_RADIUS * 2.
+                < BOID_PERCEPTION_RADIUS * 1.1
             {
                 boid_coehesion_a.vec += boid_transform_b.translation.xy();
                 num_near_boids += 1;
             }
         }
-
-        //might be wonky here
 
         if num_near_boids > 0 {
             boid_coehesion_a.vec /= num_near_boids as f32;
