@@ -1,7 +1,6 @@
 use std::ops::Range;
 
 use bevy::prelude::*;
-use bevy_inspector_egui::{inspector_options::ReflectInspectorOptions, InspectorOptions};
 use bevy_rapier2d::{
     dynamics::{CoefficientCombineRule, RigidBody, Velocity},
     geometry::{Collider, CollisionGroups, Friction, Group, Restitution},
@@ -46,8 +45,8 @@ pub struct BoidBundle {
 #[derive(Clone, Eq, PartialEq, Debug, Default, Component)]
 pub struct Boid;
 
-#[derive(Clone, PartialEq, Debug, Default, Component, Reflect, InspectorOptions)]
-#[reflect(Component, InspectorOptions)]
+#[derive(Clone, PartialEq, Debug, Default, Component, Reflect)]
+#[reflect(Component)]
 pub struct Acceleration {
     vec: Vec2,
 }
@@ -72,10 +71,9 @@ pub struct Cohesion {
     vec: Vec2,
 }
 
-#[derive(Resource, InspectorOptions, Reflect)]
-#[reflect(Resource, InspectorOptions)]
+#[derive(Resource, Reflect)]
+#[reflect(Resource)]
 pub struct AlignCoe {
-    #[inspector(min = 0.0)]
     pub mag: f32,
 }
 
@@ -87,10 +85,9 @@ impl Default for AlignCoe {
     }
 }
 
-#[derive(Resource, InspectorOptions, Reflect)]
-#[reflect(Resource, InspectorOptions)]
+#[derive(Resource, Reflect)]
+#[reflect(Resource)]
 pub struct SeperationCoe {
-    #[inspector(min = 0.0)]
     pub mag: f32,
 }
 
@@ -102,10 +99,9 @@ impl Default for SeperationCoe {
     }
 }
 
-#[derive(Resource, InspectorOptions, Reflect)]
-#[reflect(Resource, InspectorOptions)]
+#[derive(Resource, Reflect)]
+#[reflect(Resource)]
 pub struct CohesionCoe {
-    #[inspector(min = 0.0)]
     pub mag: f32,
 }
 
