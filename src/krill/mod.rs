@@ -4,7 +4,7 @@ use crate::GameState;
 
 use self::systems::*;
 
-mod systems;
+pub mod systems;
 
 pub struct KrillPlugin;
 
